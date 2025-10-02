@@ -72,7 +72,7 @@ You can ask questions like:
 ![image](dash.png)
 
 ---
-“Where’s the best confluence for a short?”
+
 
 ⚙️ How It Works
 
