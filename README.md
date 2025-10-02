@@ -1,7 +1,9 @@
 # 💹 BTMM + Quarters AI Forex Signal Engine  
 
 ## 📖 Overview  
+
 This project implements an **AI-assisted forex trading signal system** combining:  
+
 - **Steve Mauro’s Beat The Market Maker (BTMM) Method**  
 - **The Quarters Theory**  
 
@@ -12,6 +14,7 @@ It features **technical indicators (EMA, RSI, ATR, Quarters grid)**, **market se
 ---
 
 ## 🚀 Features  
+
 - ✅ Real-time intraday data via **Yahoo Finance**  
 - ✅ Session-based signal generation (London/NY)  
 - ✅ Confluence logic: sweeps + RSI + EMA + Quarters  
@@ -25,6 +28,7 @@ It features **technical indicators (EMA, RSI, ATR, Quarters grid)**, **market se
 ---
 
 ## 📂 Project Structure  
+
 ```text
 btmm-qt-ai/
 ├── src/
@@ -50,7 +54,9 @@ btmm-qt-ai/
 ├── README.md
 └── .env.example
 ```
+
 ## 📊 Example Outputs
+
 🔹 Weekly Dashboard
 🔹 AI Strategy Chat
 
@@ -112,22 +118,30 @@ SMTP_USER=youremail@gmail.com
 SMTP_PASS=your_app_password
 OPENAI_API_KEY=sk-xxxxx
 ```
+
 # Run Analysis & Alerts
+
 ```bash
 python src\analyze_and_alert.py
 ```
+
 # Run in Test mode
+
 ```bash
 python src\analyze_and_alert.py --test --signal BUY
 ```
+
 # Run Backtest
+
 ```bash
 python src\backtest.py
 ````
+
 # Launch Dashboard
+
 ```bash
 streamlit run src\streamlit_app.py
 ```
 
-* Brought to you By Maurice J. Colon
+- Brought to you By Maurice J. Colon
 2025
