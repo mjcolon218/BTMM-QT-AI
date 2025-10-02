@@ -1,0 +1,16 @@
+data/raw_pdfs/
+data/processed_pdfs/
+data/market/
+.env
+kb/chunks/
+kb/vectors/
+output/
+*.log
+outputs/*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+.venv/
