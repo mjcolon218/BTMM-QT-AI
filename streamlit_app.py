@@ -5,6 +5,7 @@ from src.sentiment import market_sentiment
 from src.chart_export import export_trade_chart
 from openai import OpenAI
 import os
+from src.utils_rag import retrieve_from_vector_db
 import dotenv
 dotenv.load_dotenv(override=True)
 
@@ -57,30 +58,37 @@ for msg in st.session_state.messages:
         st.markdown(msg["content"])
 
 # Chat input
-if prompt := st.chat_input("Ask me about USD/MXN, signals, or BTMM strategy..."):
-    # Save user message
+if prompt := st.chat_input("Ask about USD/MXN, signals, or BTMM strategy..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Build context (optionally add last signals / df tail)
+    # 📊 Context: latest market snapshot
     context = ""
-    if 'df' in locals() or 'df' in globals():
-        try:
-            last_row = df.tail(1).to_dict(orient="records")[0]
-            context = f"\n\nLatest market snapshot: {last_row}"
-        except:
-            pass
+    try:
+        last_row = df.tail(1).to_dict(orient="records")[0]
+        context = f"Latest signal snapshot: {last_row}"
+    except:
+        context = "No recent market data loaded."
 
-    # Query OpenAI
+    # 📚 Context: retrieved knowledge
+    kb_context = "\n\n".join(retrieve_from_vector_db(prompt, k=5))
+
+    # 🔗 Combined context
+    system_context = (
+        "You are a forex trading assistant using BTMM + Quarters Theory. "
+        "Ground your answers in provided knowledge and recent data."
+    )
+
     with st.chat_message("assistant"):
         try:
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a forex trading assistant. You know BTMM and Quarters Theory."},
-                    *st.session_state.messages,
-                    {"role": "system", "content": f"Use this recent USD/MXN data if relevant: {context}"}
+                    {"role":"system", "content": system_context},
+                    {"role":"system", "content": f"Knowledge base:\n{kb_context}"},
+                    {"role":"system", "content": f"Market data:\n{context}"},
+                    *st.session_state.messages
                 ]
             )
             reply = response.choices[0].message.content
@@ -88,6 +96,4 @@ if prompt := st.chat_input("Ask me about USD/MXN, signals, or BTMM strategy...")
             reply = f"⚠️ Error: {e}"
 
         st.markdown(reply)
-
-    # Save assistant reply
-    st.session_state.messages.append({"role": "assistant", "content": reply})
+    st.session_state.messages.append({"role":"assistant","content":reply})
