@@ -1,0 +1,63 @@
+{
+  "name": "BTMM + Quarters Theory Trading Strategy",
+  "timeframe": "M15",
+  "instruments": [
+    "USDMXN"
+  ],
+  "indicators": [
+    {
+      "name": "RSI",
+      "params": {
+        "period": 14.0
+      },
+      "alias": "RSI_14"
+    },
+    {
+      "name": "ATR",
+      "params": {
+        "period": 14.0
+      },
+      "alias": "ATR_14"
+    },
+    {
+      "name": "EMA",
+      "params": {
+        "period": 21.0
+      },
+      "alias": "EMA_21"
+    },
+    {
+      "name": "QuarterGrid",
+      "params": {
+        "size_pips": 25.0,
+        "pip_scale": 0.0001
+      },
+      "alias": "QG"
+    }
+  ],
+  "entries": [
+    {
+      "side": "LONG",
+      "condition": "(RSI_14 < 30) and (Close > EMA_21) and  (QG in ['Q1','Q2'])",
+      "session": "London"
+    },
+    {
+      "side": "SHORT",
+      "condition": "(RSI_14 > 70) and (Close < EMA_21) and  (QG in ['Q1','Q2'])",
+      "session": "NY"
+    }
+  ],
+  "exits": [
+    {
+      "type": "TP_SL",
+      "params": {
+        "tp_rr": 2.0,
+        "sl_atr_mult": 1.5
+      }
+    }
+  ],
+  "risk": {
+    "fixed_fraction": 0.01,
+    "max_positions": 1
+  }
+}

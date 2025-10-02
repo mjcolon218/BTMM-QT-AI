@@ -1,0 +1,19 @@
+{
+  "name": "USDMXN_Quarters_BMM_v2",
+  "timeframe": "M15",
+  "instruments": ["USDMXN"],
+  "indicators": [
+    {"name": "RSI", "params": {"period": 14}, "alias": "RSI_14"},
+    {"name": "ATR", "params": {"period": 14}, "alias": "ATR_14"},
+    {"name": "EMA", "params": {"period": 50}, "alias": "EMA_50"},
+    {"name": "QuarterGrid", "params": {"size_pips": 25, "pip_scale": 0.0001}, "alias": "QG"}
+  ],
+  "entries": [
+    {"side": "LONG",  "condition": "(RSI_14 < 45) and (Close > EMA_50) and (QG in ['Q1','Q2'])", "session": "London"},
+    {"side": "SHORT", "condition": "(RSI_14 > 65) and (Close < EMA_50) and (QG in ['Q3','Q4'])", "session": "NY"}
+  ],
+  "exits": [
+    {"type": "TP_SL", "params": {"tp_rr": 2.0, "sl_atr_mult": 1.5}}
+  ],
+  "risk": {"fixed_fraction": 0.01, "max_positions": 1}
+}

@@ -6,7 +6,6 @@ kb/chunks/
 kb/vectors/
 output/
 *.log
-outputs/*
 __pycache__/
 *.pyc
 *.pyo
