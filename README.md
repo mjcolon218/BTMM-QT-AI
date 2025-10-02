@@ -62,7 +62,9 @@ You can ask questions like:
 “How do BTMM levels align this week?”
 
 “Where’s the best confluence for a short?”
-![image](\images\dash.png)
+
+![image](images\dash.png)
+
 ---
 “Where’s the best confluence for a short?”
 
@@ -87,15 +89,20 @@ LLM Chat Assistant → Retrieves knowledge from vector DB + last snapshot to ans
 ![image](images\test_chart.png)
 
 # 🛠 Setup & Run
+
 ```bash
 git clone https://github.com/mjcolon218/BTMM-QT-AI.git
 cd BTMM-QT-AI
 ```
+
 # Install Dependencies
+
 ```bash
 pip install -r requirements.txt 
 ```
+
 # Configure Environment
+
 ```bash
 ALERT_TO=youremail@gmail.com
 ALERT_FROM=youremail@gmail.com
