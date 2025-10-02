@@ -69,7 +69,7 @@ You can ask questions like:
 
 “Where’s the best confluence for a short?”
 
-![image](.\docs\images\dash.png)
+![image](.\dash.png)
 
 ---
 “Where’s the best confluence for a short?”
@@ -92,7 +92,7 @@ Streamlit Dashboard → Logs trades, visualizes signals.
 
 LLM Chat Assistant → Retrieves knowledge from vector DB + last snapshot to answer strategic questions.
 
-![image](.\docs\images\test_chart.png)
+![image](.\test_chart.png)
 
 # 🛠 Setup & Run
 
