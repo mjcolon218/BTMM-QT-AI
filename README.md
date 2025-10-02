@@ -62,7 +62,7 @@ You can ask questions like:
 “How do BTMM levels align this week?”
 
 “Where’s the best confluence for a short?”
-![image](.\outputs\images\dash.png)
+![image](\outputs\images\dash.png)
 ---
 “Where’s the best confluence for a short?”
 
@@ -84,7 +84,7 @@ Streamlit Dashboard → Logs trades, visualizes signals.
 
 LLM Chat Assistant → Retrieves knowledge from vector DB + last snapshot to answer strategic questions.
 
-![image](.\outputs\images\test_chart.png)
+![image](\outputs\images\test_chart.png)
 
 # 🛠 Setup & Run
 ```bash
