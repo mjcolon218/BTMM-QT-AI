@@ -1,9 +1,6 @@
-data/raw_pdfs/
-data/processed_pdfs/
-data/market/
+data
 .env
-kb/chunks/
-kb/vectors/
+kb
 
 *.log
 __pycache__/
