@@ -142,6 +142,7 @@ def main():
     # 1) Data
     df = fetch_usdmxn_period(period="7d",interval="15m")
     df = add_sessions(df)
+    df.to_csv("data/market/USDMXN_M15.csv", index_label="Datetime")
     last = df.index[-1]
     print("local time:", last.tz_convert("America/New_York"))
     print("UTC time:  ", last.tz_convert("UTC"))
