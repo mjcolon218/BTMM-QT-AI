@@ -3,15 +3,15 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-def export_trade_chart(df, fname="outputs/alerts/chart.png",
-                       price_col="Close", ema_col="EMA_21",
+def export_trade_chart(df, fname="outputs/alerts/trade_chart.png",
+                       price_col="Close", ema_col="EMA_50",
                        sentiment=None):
     """
     Save a PNG of the last ~300 bars with BUY/SELL/EXIT markers,
     shading London & NY sessions, and adding sentiment text if provided.
     """
 
-    os.makedirs(os.path.dirname(fname), exist_ok=True)
+    #os.makedirs(os.path.dirname(fname), exist_ok=True)
 
     df_last = df.tail(300).copy()
     if df_last.empty or price_col not in df_last.columns:
@@ -73,4 +73,5 @@ def export_trade_chart(df, fname="outputs/alerts/chart.png",
 
     fig.savefig(fname, dpi=150)
     plt.close(fig)
+    print(f"Chart exported to {fname}")
     return fname

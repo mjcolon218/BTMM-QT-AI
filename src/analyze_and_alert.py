@@ -136,13 +136,22 @@ def send_email(subject: str, body: str, attachment=None):
             s.login(SMTP_USER, SMTP_PASS)
         s.sendmail(ALERT_FROM, [ALERT_TO], msg.as_string())
 
+# Add confidence scoring
+def score_signal(r):
+    score = 0
+    if r.get("SweepLo",0)==1 or r.get("SweepHi",0)==1: score += 40
+    if r.get("QG_DistPips",99) <= 6: score += 20
+    if r.get("RSI_14",0) < 30 or r.get("RSI_14",0) > 70: score += 20
+    if (r.get("EMA_50",0) > r.get("EMA_200",0)) or (r.get("EMA_50",0) < r.get("EMA_200",0)): score += 20
+    return score
+
 # ---------- MAIN ----------
 def main():
     args = parse_args()
     # 1) Data
     df = fetch_usdmxn_period(period="7d",interval="15m")
     df = add_sessions(df)
-    df.to_csv("data/market/USDMXN_M15.csv", index_label="Datetime")
+
     last = df.index[-1]
     print("local time:", last.tz_convert("America/New_York"))
     print("UTC time:  ", last.tz_convert("UTC"))
@@ -156,7 +165,11 @@ def main():
         return
 
     # 3) Signals
-    df = signalize(df, spec).dropna()
+    df = signalize(df, spec)
+    df['Score'] = df.apply(score_signal, axis=1)
+    df.to_csv("data/market/USDMXN_M15.csv", index_label="Datetime")
+    #print(df.tail(10)[["Close","Signal","Session","Score"]])
+    #print(df.head())
     if df.empty:
         print("No data after dropna; exiting.")
         return
@@ -164,6 +177,8 @@ def main():
     # 4) Latest bar
     latest_dt = df.index[-1]
     latest = df.iloc[-1]
+    score = latest.get("Score",0)
+    #body += f"\nSignal confidence score: {score}/100\n"
     session = latest.get("Session","Other")
     signal  = latest.get("Signal","FLAT")
     if args.test:
@@ -174,19 +189,22 @@ def main():
     if not args.test:
         if session not in ("London","NY"):
             print(f"Session={session}, skip.")
-            return
-        if signal not in ("BUY","SELL"):
+            
+        elif signal not in ("BUY","SELL"):
             print(f"Signal={signal}, skip.")
-            return
+            
 
     ts_iso = latest_dt.isoformat()
     if already_alerted_for(ts_iso):
         print("Already alerted for this bar; skip.")
-        return
+        
 
     # 5) Sentiment analysis
     sentiment = market_sentiment(df)
+    #print("Debug Sentiment:", sentiment)
     sentiment_str = "\n".join([f"- {k}: {v}" for k,v in sentiment.items()])
+    
+    #print(sentiment_str)
 
     # 6) Build alert body
     price = float(latest["Close"])
@@ -202,20 +220,23 @@ def main():
         f"QG: {qg} | RSI_14: {rsi14:.2f} | EMA_50: {ema21:.5f}\n"
         f"Strategy: {spec.name}\n"
         f"Timeframe: {spec.timeframe}\n"
+        f"Confidence Score: {score}/100\n"
         f"(Generated from BTMM + Quarters context)\n\n"
         "Market Sentiment:\n" + sentiment_str
     )
     subject = f"[USDMXN {spec.timeframe}] {signal} @ {price:.5f} ({session})"
 
     # 7) Export chart with sentiment
-    chart_path = export_trade_chart(df, "outputs/alerts/usdmxn_chart.png", price_col="Close", ema_col="EMA_50", sentiment=sentiment)
+    chart_path = export_trade_chart(df, "outputs/images/usdmxn_chart.png", price_col="Close", ema_col="EMA_50", sentiment=sentiment)
 
     # 8) Send email
-    send_email(subject, body, attachment=chart_path)
-    if not args.test:
-        write_last_alert(ts_iso, {"signal": signal, "price": price, "session": session})
-    print("✅ Alert sent with sentiment + chart.")
-
+    if (session in ("London","NY")) and (signal in ("BUY","SELL")):
+        send_email(subject, body, attachment=chart_path)
+        if not args.test:
+            write_last_alert(ts_iso, {"signal": signal, "price": price, "session": session})
+        print("✅ Alert sent with sentiment + chart.")
+    else:
+        print("No alert window; Session = {session}, Signal = {signal}")
 if __name__ == "__main__":
     main()
     
