@@ -166,7 +166,19 @@ def main():
 
     # 3) Signals
     df = signalize(df, spec)
-    df['Score'] = df.apply(score_signal, axis=1)
+    print(df.head())
+    if "Score" not in df.columns:
+        df["Score"] = df.apply(score_signal, axis=1)
+    if "EMA_50" not in df.columns:
+        df["EMA_50"] = ema(df["Close"], 50)
+    if "EMA_200" not in df.columns:
+        df["EMA_200"] = ema(df["Close"], 200)
+
+    cols = ["Close", "Signal", "Session","QG", "RSI_14", "EMA_50", "EMA_200","High","Low","SweepHi","SweepLo"]
+    valid_cols = [c for c in cols if c in df.columns]
+    out = df[valid_cols].copy()
+    out['Score'] = df.apply(score_signal, axis=1)
+    out.to_csv("outputs/signals/usdmxn_signals_with_trades.csv", index_label="Datetime")
     df.to_csv("data/market/USDMXN_M15.csv", index_label="Datetime")
     #print(df.tail(10)[["Close","Signal","Session","Score"]])
     #print(df.head())

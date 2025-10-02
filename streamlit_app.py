@@ -5,8 +5,8 @@ from src.sentiment import market_sentiment
 from src.chart_export import export_trade_chart
 
 # Load last week's signals
-df = pd.read_csv("outputs/signals/usdmxn_signals_with_trades.csv", parse_dates=["Datetime"]).set_index("Datetime")
-
+df = pd.read_csv("outputs/signals/usdmxn_signals_with_trades.csv",parse_dates=["Datetime"])
+df = df.set_index("Datetime")
 st.title("📊 USDMXN BTMM + Quarters Dashboard")
 
 # --- Weekly Stats ---
