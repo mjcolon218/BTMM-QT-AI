@@ -9,3 +9,4 @@ fitz   # PyMuPDF
 PyMuPDF==1.24.9
 requests
 tf-keras
+streamlit

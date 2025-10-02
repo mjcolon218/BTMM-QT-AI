@@ -1,7 +1,6 @@
 # src/analyze_and_alert.py
 import os, json, re, smtplib, requests
 import pandas as pd
-import yfinance as yf
 import numpy as np
 from email.mime.text import MIMEText
 from email.utils import formatdate
@@ -30,37 +29,49 @@ SMTP_HOST      = os.getenv("SMTP_HOST")
 SMTP_PORT      = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER      = os.getenv("SMTP_USER")
 SMTP_PASS      = os.getenv("SMTP_PASS")
-
+ALPHA_KEY      = os.getenv("ALPHA_KEY")  # <-- NEW
 # ---------- HELPERS ----------
 def utc_now():
     return datetime.now(timezone.utc)
 
-def fetch_usdmxn_period(interval="15m", period="7d"):
+def fetch_usdmxn_period(interval="15min", outputsize="compact"):
     """
-    Fetch intraday USD/MXN candles from Yahoo Finance.
-    Flattens MultiIndex so downstream feature funcs work.
+    Fetch USDMXN intraday candles from AlphaVantage.
+    interval: '1min', '5min', '15min', '30min', '60min'
+    outputsize: 'compact' (100 bars) or 'full' (~1 month)
     """
-    ticker = "USDMXN=X"
-    df = yf.download(ticker, interval=interval, period=period)
+    url = "https://www.alphavantage.co/query"
+    params = {
+        "function": "FX_INTRADAY",
+        "from_symbol": "USD",
+        "to_symbol": "MXN",
+        "interval": interval,
+        "outputsize": outputsize,
+        "apikey": ALPHA_KEY,  # <-- store in .env as ALPHA_KEY
+    }
+    r = requests.get(url, params=params, timeout=30)
+    r.raise_for_status()
+    js = r.json()
 
-    if df.empty:
-        raise RuntimeError("No data returned from Yahoo Finance")
+    if "Time Series FX (" not in str(js):
+        raise RuntimeError(f"AlphaVantage response error: {js}")
 
-    # Flatten if yfinance gives MultiIndex (Price/Ticker)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = [col[0] for col in df.columns]
+    # Key looks like: "Time Series FX (15min)"
+    ts_key = [k for k in js.keys() if "Time Series FX" in k][0]
+    df = pd.DataFrame.from_dict(js[ts_key], orient="index")
+    df = df.rename(columns={
+        "1. open": "Open",
+        "2. high": "High",
+        "3. low": "Low",
+        "4. close": "Close"
+    }).astype(float)
 
-    # Ensure UTC tz
-    if df.index.tz is None:
-        df.index = df.index.tz_localize("UTC")
-    else:
-        df.index = df.index.tz_convert("UTC")
+    # Convert index to datetime (UTC)
+    df.index = pd.to_datetime(df.index, utc=True)
+    df = df.sort_index()
 
-    # Keep consistent col order
-    df = df[["Open","High","Low","Close","Volume"]]
-
+    print("Data covers:", df.index.min(), "→", df.index.max())
     return df
-
 def add_sessions(df):
     """
     Tag sessions using strict UTC hours:
@@ -140,7 +151,7 @@ def send_email(subject: str, body: str, attachment=None):
 def main():
     args = parse_args()
     # 1) Data
-    df = fetch_usdmxn_period(period="7d",interval="15m")
+    df = fetch_usdmxn_period()
     df = add_sessions(df)
     last = df.index[-1]
     print("local time:", last.tz_convert("America/New_York"))
