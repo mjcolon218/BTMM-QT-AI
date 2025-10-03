@@ -166,7 +166,7 @@ def main():
 
     # 3) Signals
     df = signalize(df, spec)
-    print(df.head())
+    #print(df.head())
     if "Score" not in df.columns:
         df["Score"] = df.apply(score_signal, axis=1)
     if "EMA_50" not in df.columns:
@@ -187,8 +187,8 @@ def main():
         return
 
     # 4) Latest bar
-    latest_dt = df.index[-1]
-    latest = df.iloc[-1]
+    latest_dt = out.index[-1]
+    latest = out.iloc[-1]
     score = latest.get("Score",0)
     #body += f"\nSignal confidence score: {score}/100\n"
     session = latest.get("Session","Other")
@@ -212,7 +212,7 @@ def main():
         
 
     # 5) Sentiment analysis
-    sentiment = market_sentiment(df)
+    sentiment = market_sentiment(out)
     #print("Debug Sentiment:", sentiment)
     sentiment_str = "\n".join([f"- {k}: {v}" for k,v in sentiment.items()])
     
@@ -248,7 +248,7 @@ def main():
             write_last_alert(ts_iso, {"signal": signal, "price": price, "session": session})
         print("✅ Alert sent with sentiment + chart.")
     else:
-        print("No alert window; Session = {session}, Signal = {signal}")
+        print(f"No alert window; Session = {session}, Signal = {signal}")
 if __name__ == "__main__":
     main()
     
